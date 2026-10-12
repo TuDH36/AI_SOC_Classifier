@@ -1,0 +1,71 @@
+{
+  "tenant": "VND",
+  "text_cols": [
+    "events.command",
+    "events.scriptblocktext",
+    "events.image",
+    "events.sourceimage",
+    "events.targetimage",
+    "events.targetfilename",
+    "events.taskname",
+    "events._raw",
+    "events.processname",
+    "events.process",
+    "events.parent_process",
+    "events.process_name",
+    "events.process_path",
+    "events.process_exec",
+    "events.parent_process_path",
+    "events.objectname",
+    "events.details",
+    "events.devicedescription",
+    "events.request",
+    "events.response",
+    "events.uri",
+    "events.eventdata_xml",
+    "events.system_props_xml",
+    "events.targetdomainname",
+    "events.naturallangdescription",
+    "events.compatibleids",
+    "events.startfunction",
+    "events.startmodule",
+    "events.registry_hive",
+    "events.registry_path",
+    "events.registry_key_name"
+  ],
+  "threshold": 0.5,
+  "min_important_fields": 2,
+  "required_fields": [],
+  "field_aliases": {},
+  "model_version": "v1.0",
+  "sklearn_version": "1.3.0",
+  "_note": "cat_cols (38) duoc lay tu cat_encoder.feature_names_in_ luc load, khong khai o day.",
+  "_n_cat_cols": 38,
+  "base_version": null,
+  "added_count": 0,
+  "removed_count": 0,
+  "created_at": "2026-10-09T03:11:22Z",
+  "created_by": "developer",
+  "artifacts": [
+    {
+      "file": "cat_encoder.pkl",
+      "sha256": "3d7507ea0daea19b9a303032901f633fda7b84bc280583b0d8158f6df3b85128",
+      "size_bytes": 17905
+    },
+    {
+      "file": "lgbm_clf.pkl",
+      "sha256": "0f8b2e517ab512dbe30e868f70eb0388b4d5e67d52fd794b01660debd7a828b5",
+      "size_bytes": 1478156
+    },
+    {
+      "file": "tfidf_char.pkl",
+      "sha256": "3ff6fea25a9b4591d82ada96dae5b182f2b3d7b91cdd07925dafa8ff028fef73",
+      "size_bytes": 1085685
+    },
+    {
+      "file": "tfidf_word.pkl",
+      "sha256": "1cdf8cb75e8f81fc8b3774066e80f115b34366530cbf5e717cbb831db2bedc91",
+      "size_bytes": 702227
+    }
+  ]
+}
