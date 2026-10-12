@@ -159,7 +159,7 @@ curl -X POST http://localhost:8000/predict \
 
 # Nhiều cảnh báo: body là 1 list, mỗi phần tử có tenant/version riêng
 curl -X POST http://localhost:8000/predict/batch \
-  -H "Content-Type: application/json" -d @sample_batch.json
+  -H "Content-Type: application/json" -d '[{...}, {...}]'   # body mẫu đầy đủ có trong Swagger /docs
 ```
 
 ## Cấu hình (ENV)
@@ -228,41 +228,19 @@ Docker đã tạo `/app/logs` cho UID/GID `10001:10001`. Để giữ log khi tha
 dùng volume riêng cho instance:
 
 ```bash
-docker run --rm -p 8000:8000 -v soc-clf-logs:/app/logs soc-alert-classifier:2.0
+docker run --rm -p 8000:8000 -v soc-clf-logs:/app/logs soc-alert-classifier:2.1
 ```
 
 Nếu bind-mount thư mục có sẵn, cấp quyền ghi cho UID/GID `10001:10001` trên host.
 Chạy **một worker/process ghi mỗi file** để xoay log đúng; các instance khác dùng
 file/volume riêng. Không cấu hình nhiều worker cùng ghi `ALERT_LOG_PATH`.
 
-## Kiểm thử
+## Kiểm thử nhanh
 
-Sau khi cài `requirements.txt`, chạy bộ kiểm thử bằng `unittest` có sẵn trong Python:
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-Trên Windows, nếu pip gặp lỗi đọc comment tiếng Việt trong requirements, dùng
+Mở Swagger `http://<host>:<port>/docs`, chọn `POST /predict/batch` → *Try it out* → *Execute*
+với body mẫu có sẵn: phần tử 1 trả `rate`, phần tử 2 (version `v9.9`) trả `UNKNOWN_MODEL_VERSION`.
+Trên Windows, nếu pip lỗi đọc comment tiếng Việt trong requirements, dùng
 `python -X utf8 -m pip install -r requirements.txt`.
-Kiểm thử dùng model giả, MinIO giả và thư mục tạm để kiểm tra: phản hồi API và log
-(thời điểm nhận, lỗi batch/JSON, request đồng thời, escape, xoay file), hợp đồng
-`model_version`, kho model (checksum, cache, MinIO mất kết nối, version không tồn tại),
-registry (tenant không phân biệt hoa/thường, LRU, nạp 1 lần khi đồng thời) và `FieldMapper`.
-
-Smoke test với model thật (so `rate` với baseline `0.00197, 0.003237, 0.001798`):
-
-```bash
-MODEL_STORE=local MODELS_ROOT=$(pwd)/models python -X utf8 -c "
-import json
-from app.tenant_registry import get_registry
-from app.validation import extract_alert, extract_model_version
-reg = get_registry()
-for env in json.load(open('sample_batch.json', encoding='utf-8')):
-    _, ten, alert = extract_alert(env)
-    print(reg.get(ten, extract_model_version(env)).predict_one(alert)['rate'])
-"
-```
 
 ## Lưu ý version
 

@@ -1,5 +1,5 @@
 """
-AlertClassifier (per-tenant) — pipeline phục vụ khớp tuyệt đối với Code_thuan.ipynb.
+AlertClassifier (per-tenant) — pipeline phục vụ khớp tuyệt đối với Module_Training.ipynb.
 
 Mỗi instance gắn với 1 tenant: load 4 artifact + manifest, build FieldMapper riêng.
 

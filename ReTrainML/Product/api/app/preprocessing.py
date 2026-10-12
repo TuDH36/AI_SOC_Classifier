@@ -1,14 +1,14 @@
 """
-Tiền xử lý giá trị — sao y logic trong Code_thuan.ipynb.
+Tiền xử lý giá trị — sao y logic trong Module_Training.ipynb.
 
 Hai bước được dùng lúc train, áp dụng theo đúng thứ tự:
 
-1. clean_data (cell 3):
+1. clean_data (cell 4):
    - chuẩn hóa giá trị string: lowercase
    - thay mọi chuỗi backslash `\\+` -> `/`
    (phần chuẩn hóa TÊN CỘT được xử lý riêng ở field_mapping.py)
 
-2. clean_noisy_values (cell 24): dùng regex bỏ 4 loại nhiễu
+2. clean_noisy_values (cell 26): dùng regex bỏ 4 loại nhiễu
    - timestamp ISO
    - unix timestamp (10-13 chữ số)
    - hash/hex/base64 dài (>=16 ký tự)

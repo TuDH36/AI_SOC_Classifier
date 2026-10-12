@@ -45,10 +45,42 @@ from app.errors import APIError, InvalidStructureError
 from app.tenant_registry import get_registry
 from app.validation import extract_alert, extract_model_version, find_alert_id
 
+API_DESCRIPTION = """
+Phân loại cảnh báo SIEM True/False Positive theo **(tenant, phiên bản model)**.
+
+- Tenant: `raw_data.tenant` (không phân biệt hoa/thường). Phiên bản: `raw_data.model_version` (**bắt buộc**).
+- Feature chỉ lấy từ mảng `events`. Phần còn lại của envelope bị bỏ qua.
+- Kết quả: `rate` = xác suất True Positive (0..1) + `model_version` đã dùng.
+
+| HTTP | error_code | Ý nghĩa | BE xử lý |
+|---|---|---|---|
+| 422 | INVALID_STRUCTURE | Thiếu/sai raw_data.tenant, raw_data.model_version hoặc events | Sửa request, không retry |
+| 422 | INVALID_ALERT | < 2 trường quan trọng có dữ liệu | Không phân tích được, không retry |
+| 404 | UNKNOWN_TENANT | Tenant chưa có model | Không retry |
+| 404 | UNKNOWN_MODEL_VERSION | Tenant không có phiên bản này | Kiểm tra version đang áp dụng |
+| 503 | MODEL_STORE_UNAVAILABLE | Kho model (MinIO) tạm lỗi, `retryable: true` | Retry sau |
+| 500 | MODEL_INTEGRITY_ERROR | Bộ model hỏng/sai checksum | Báo đội AI |
+
+`/predict/batch` luôn trả HTTP 200 nếu body là list hợp lệ; lỗi từng alert nằm đúng vị trí trong list.
+"""
+
+ALERT_EXAMPLE = {
+    "id": "seed-stg-NCS-972189_VND",
+    "tenancy_id": 1,
+    "severity": "HIGH",
+    "content": "[VND6826cb451ab402aa] Suspicious code execution",
+    "raw_data": {"tenant": "vnd", "model_version": "v1.0"},
+    "events": [
+        {"Command": "powershell.exe -enc SQBFAFgA", "host": "PTI-JUMP-NCS",
+         "process_name": "powershell.exe", "parent_process": "C:\\Windows\\explorer.exe"},
+        {"host": "PTI-JUMP-NCS", "signature": "Suspicious PowerShell", "EventCode": "4688"},
+    ],
+}
+
 app = FastAPI(
     title="SOC Alert Classifier (multi-tenant)",
-    description="Phân loại cảnh báo SIEM True/False Positive theo từng tenant.",
-    version="2.0.0",
+    description=API_DESCRIPTION,
+    version="2.1.0",
 )
 app.add_middleware(AlertLogMiddleware)
 
@@ -108,7 +140,11 @@ def _warmup() -> None:
 @app.post("/predict")
 def predict(
     request: Request,
-    payload: Dict[str, Any] = Body(..., description="1 envelope cảnh báo (raw_data.tenant + events[]).")
+    payload: Dict[str, Any] = Body(
+        ...,
+        description="1 envelope cảnh báo (raw_data.tenant + raw_data.model_version + events[]).",
+        openapi_examples={"alert": {"summary": "1 alert VND, model v1.0", "value": ALERT_EXAMPLE}},
+    )
 ) -> Any:
     log = get_alert_log(request.scope)
     if log is not None:
@@ -129,7 +165,12 @@ def predict(
 def predict_batch(
     request: Request,
     payload: List[Dict[str, Any]] = Body(
-        ..., description="Danh sách envelope cảnh báo, mỗi cái có raw_data.tenant riêng."
+        ...,
+        description="Danh sách envelope cảnh báo, mỗi cái có raw_data.tenant + raw_data.model_version riêng.",
+        openapi_examples={"batch": {"summary": "2 alert: 1 hợp lệ, 1 sai version", "value": [
+            ALERT_EXAMPLE,
+            {**ALERT_EXAMPLE, "id": "alert-2", "raw_data": {"tenant": "vnd", "model_version": "v9.9"}},
+        ]}},
     )
 ) -> Any:
     log = get_alert_log(request.scope)

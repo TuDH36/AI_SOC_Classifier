@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Mã nguồn và artifact model.
 COPY app/ ./app/
-# Chỉ bộ model theo cấu trúc MinIO (dự phòng khi MODEL_STORE=local); bỏ các .pkl cũ nằm lẻ trong models/.
+# Bộ model theo cấu trúc MinIO (dự phòng khi MODEL_STORE=local).
 COPY models/tenants/ ./models/tenants/
 
 # Thư mục log và cache model (tải từ MinIO) phải ghi được bởi user chạy API.

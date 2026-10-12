@@ -1,8 +1,6 @@
 __pycache__/
 *.pyc
 *.pyo
-.pytest_cache/
-tests/
 .venv/
 *.md
 .git/
@@ -10,7 +8,3 @@ tests/
 .env
 logs/
 model-cache/
-# Không cần khi chạy: file tham khảo, model cũ nằm lẻ, dữ liệu mẫu để test thủ công
-app/features.py
-models/*.pkl
-sample_batch.json
